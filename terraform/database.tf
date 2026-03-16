@@ -29,3 +29,10 @@ resource "google_sql_user" "root_user" {
   instance = google_sql_database_instance.primary_db.name
   password = var.db_password # variables.tf에서 주입받은 비밀번호 사용
 }
+# ----------------------------------------------------------------
+# 👇 추가되는 부분: 백엔드 앱의 데이터가 정착할 '논리적 DB(방)' 공간 생성
+# ----------------------------------------------------------------
+resource "google_sql_database" "app_db" {
+  name     = "hybrid_app_db" # 호성님(백엔드)이 Spring Boot 설정에 적어넣을 실제 DB 이름
+  instance = google_sql_database_instance.primary_db.name
+}
