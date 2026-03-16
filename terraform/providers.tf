@@ -15,6 +15,11 @@ terraform {
       source  = "hashicorp/local"
       version = "~> 2.0"
     }
+    # ✨ 여기에 추가하세요! (시간 대기용 플러그인)
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
