@@ -25,8 +25,7 @@ terraform {
 
 # 구글 클라우드 계정에 로그인하는 부분입니다.
 provider "google" {
-  # (초특급 주의) 성호님의 마스터키 파일입니다. 절대 GitHub에 올리면 안 됩니다!
-  credentials = file("gcpkey.json") 
+
   
   # 아래 변수들은 variables.tf 파일에서 끌어와서 사용합니다.
   project     = var.project_id
