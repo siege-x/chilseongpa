@@ -1,30 +1,59 @@
-# ==============================================================================
-# [network.tf] K3s 노드의 IP를 고정하고, 타 팀이 들어올 수 있도록 대문을 엽니다.
-# ==============================================================================
-
 # 1. K3s 노드용 정적 퍼블릭 IP (Static IP)
-# 이유: 노드가 재부팅되어도 IP가 바뀌지 않아야 Cloudflare DNS 설정이 유지됩니다.
 resource "google_compute_address" "k3s_static_ip" {
   name   = "k3s-primary-static-ip"
   region = var.region
 }
 
-# 2. 타 팀(AWS 모니터링, Cloudflare Edge)을 위한 방화벽 규칙
-resource "google_compute_firewall" "allow_k3s_ports" {
-  name    = "allow-k3s-http-https-metrics"
+# -------------------------------------------------------------------------
+# 🛡️ 방화벽 규칙 1: 관리자 접근용 (SSH & K3s API)
+# -------------------------------------------------------------------------
+resource "google_compute_firewall" "allow_admin_access" {
+  name    = "allow-k3s-admin-ssh-api"
   network = "default"
 
   allow {
     protocol = "tcp"
-    # 80, 443: Cloudflare의 Health Check 및 사용자 트래픽 통과용
-    # 9100: AWS 통합 모니터링 서버가 K3s 노드의 CPU/RAM 지표를 긁어가는 포트
-    ports    = ["80", "443", "9100"] 
+    ports    = ["22", "6443"] # 22(Ansible 접속용), 6443(외부 kubectl 제어용)
   }
 
-  # 이 방화벽 규칙을 적용할 타겟 (compute.tf에서 만든 K3s 노드 태그와 일치해야 함)
-  target_tags   = ["k3s-node"]
+  target_tags = ["k3s-node"]
   
-  # 어디서부터의 접근을 허용할 것인가 (0.0.0.0/0 은 전 세계 허용)
-  # (실무 팁: 실제 운영 시에는 AWS IP와 Cloudflare IP만 넣어서 보안을 강화합니다)
+  # [아키텍트의 주의사항] 
+  # 지금은 테스트를 위해 0.0.0.0/0을 열어두지만, 실무에서는 성호님 집 IP나
+  # GitHub Actions의 IP 대역만 허용하도록 범위를 축소해야 해킹을 막습니다!
+  source_ranges = ["0.0.0.0/0"] 
+}
+
+# -------------------------------------------------------------------------
+# 🛡️ 방화벽 규칙 2: 사용자 서비스용 (웹 트래픽)
+# -------------------------------------------------------------------------
+resource "google_compute_firewall" "allow_web_traffic" {
+  name    = "allow-k3s-web-traffic"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"] # Cloudflare 트래픽 및 헬스체크 통과
+  }
+
+  target_tags = ["k3s-node"]
+  source_ranges = ["0.0.0.0/0"] # 실무에서는 Cloudflare 공식 IP 대역만 허용
+}
+
+# -------------------------------------------------------------------------
+# 🛡️ 방화벽 규칙 3: AWS 통합 모니터링 허용 (Prometheus 수집용)
+# -------------------------------------------------------------------------
+resource "google_compute_firewall" "allow_monitoring_scrape" {
+  name    = "allow-k3s-monitoring"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8080", "9100"] # 8080(앱 메트릭), 9100(노드 익스포터)
+  }
+
+  target_tags = ["k3s-node"]
+  
+  # 실무에서는 '희정님의 AWS Monitoring 서버 IP' 딱 1개만 넣는 것이 정석입니다!
   source_ranges = ["0.0.0.0/0"] 
 }
