@@ -40,3 +40,41 @@ resource "google_secret_manager_secret_version" "db_proxy_key_version" {
   # 위 3번에서 발급받은 키 데이터를 금고 안에 쏙 집어넣습니다!
   secret_data = base64decode(google_service_account_key.db_proxy_sa_key.private_key)
 }
+
+# ==============================================================================
+# 2. Monitoring (AWS Prometheus -> GCP Nodes) 용 권한 및 금고 
+# ==============================================================================
+resource "google_service_account" "monitoring_sa" {
+  account_id   = "aws-monitoring-sa"
+  display_name = "For AWS Prometheus Node Discovery"
+}
+
+resource "time_sleep" "wait_30_seconds_monitoring" {
+  depends_on = [google_service_account.monitoring_sa] 
+  create_duration = "30s"
+}
+
+resource "google_project_iam_member" "monitoring_sa_role" {
+  depends_on = [time_sleep.wait_30_seconds_monitoring] 
+  project = var.project_id
+  # 💡 핵심: 모니터링 로봇은 DB가 아니라 'GCP 서버 목록'을 읽을 권한이 필요합니다.
+  role    = "roles/compute.viewer" 
+  member  = "serviceAccount:${google_service_account.monitoring_sa.email}"
+}
+
+resource "google_service_account_key" "monitoring_sa_key" {
+  depends_on = [time_sleep.wait_30_seconds_monitoring] 
+  service_account_id = google_service_account.monitoring_sa.name
+}
+
+resource "google_secret_manager_secret" "monitoring_key_secret" {
+  secret_id = "aws-monitoring-key-json"
+  replication {
+    auto {} 
+  }
+}
+
+resource "google_secret_manager_secret_version" "monitoring_key_version" {
+  secret      = google_secret_manager_secret.monitoring_key_secret.id
+  secret_data = base64decode(google_service_account_key.monitoring_sa_key.private_key)
+}
