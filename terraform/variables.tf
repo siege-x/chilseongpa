@@ -21,7 +21,8 @@ variable "zone" {
 }
 
 variable "db_password" {
-  description = "Cloud SQL Root 비밀번호 (terraform.tfvars 파일에서 따로 주입받음)"
+  # 💡 수정된 설명: 파일이 아닌 GitHub Secrets를 통한 보안 주입임을 명시
+  description = "Cloud SQL Root 비밀번호 (GitHub Secrets: TF_VAR_db_password를 통해 주입)"
   type        = string
-  sensitive   = true # 화면이나 로그에 비밀번호가 노출되지 않도록 가려줍니다.
+  sensitive   = true # 비밀번호가 로그나 화면에 노출되는 것을 방지
 }
