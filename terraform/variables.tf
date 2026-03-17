@@ -4,7 +4,7 @@
 # ==============================================================================
 
 variable "project_id" {
-  description = "GCP 프로젝트 ID (예: hybrid-cloud-12345)"
+  description = "GCP 프로젝트 ID (GitHub Secrets: TF_VAR_project_id에서 보안 주입)"
   type        = string
 }
 
