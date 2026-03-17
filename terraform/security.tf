@@ -16,7 +16,7 @@ resource "google_project_service" "secretmanager_api" {
 # 1. DB 접속용 로봇 계정(SA) 생성
 resource "google_service_account" "db_proxy_sa" {
   account_id   = "gcp-db-proxy-sa"
-  display_name = "For Cloud SQL Auth Proxy (Spring Boot)"
+  display_name = "For Cloud SQL Auth Proxy"
 }
 
 # 2. 계정 전파를 위한 30초 대기
