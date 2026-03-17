@@ -8,14 +8,23 @@ resource "google_sql_database_instance" "primary_db" {
   database_version = "MYSQL_8_0" # 최신 MySQL 8.0 엔진 사용
   region           = var.region
 
-  settings {
-    # DB 체급 설정: 부하 테스트를 견딜 수 있도록 vCPU 2개, RAM 7.5GB 할당
+settings {
     tier = "db-custom-2-7680" 
     
     ip_configuration {
-      # 💡 핵심: Auth Proxy(IAM 인증)가 다이렉트로 찾아올 수 있도록 Public IP 활성화
-      # (IP 방화벽 검사를 하지 않으므로 authorized_networks 설정이 필요 없습니다!)
       ipv4_enabled = true 
+
+      # 🚨 [추가] 1. GCP 내부 K3s 노드의 접근 허용 (network.tf의 고정 IP 연결)
+      authorized_networks {
+        name  = "gcp-primary-k3s"
+        value = google_compute_address.k3s_static_ip.address
+      }
+
+      # 🚨 [추가] 2. AWS Standby 환경의 NAT IP 허용 (일단 변수로 처리)
+      authorized_networks {
+        name  = "aws-standby-nat"
+        value = var.aws_standby_nat_ip 
+      }
     }
   }
   
@@ -33,6 +42,6 @@ resource "google_sql_user" "root_user" {
 # 👇 추가되는 부분: 백엔드 앱의 데이터가 정착할 '논리적 DB(방)' 공간 생성
 # ----------------------------------------------------------------
 resource "google_sql_database" "app_db" {
-  name     = "hybrid_app_db" # 호성님(백엔드)이 Spring Boot 설정에 적어넣을 실제 DB 이름
+  name     = "hybrid_app_db" # 호성님(백엔드) 설정에 적어넣을 실제 DB 이름
   instance = google_sql_database_instance.primary_db.name
 }
