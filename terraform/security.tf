@@ -81,7 +81,7 @@ resource "time_sleep" "wait_30_seconds_monitoring" {
 resource "google_project_iam_member" "monitoring_sa_role" {
   depends_on = [time_sleep.wait_30_seconds_monitoring]
   project    = var.project_id
-  role       = "roles/compute.viewer"
+  role       = "roles/monitoring.viewer"
   member     = "serviceAccount:${google_service_account.monitoring_sa.email}"
 }
 
