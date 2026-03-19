@@ -27,7 +27,7 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          credentials_json: ${{ secrets.GCPKEY_JSON }}
 
       # 3. 🛡️ 현재 깃허브 서버의 실시간 IP를 뽑아서 테라폼에 넘길 준비 (Zero Trust)
       - name: Get GitHub Runner IP
@@ -44,7 +44,7 @@ jobs:
       - name: Terraform Init & Apply
         working-directory: ./terraform
         env:
-          TF_VAR_runner_ip: ${{ env.RUNNER_IP }}
+          TF_VAR_runner_ip: "${{ env.RUNNER_IP }}"
         run: |
           terraform init
           terraform apply -auto-approve
