@@ -28,6 +28,12 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCPKEY_JSON }}
+          project_id: ${{ secrets.TF_VAR_PROJECT_ID }} 
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
       # 3. 🛡️ 현재 깃허브 서버의 실시간 IP를 뽑아서 테라폼에 넘길 준비 (Zero Trust)
       - name: Get GitHub Runner IP
