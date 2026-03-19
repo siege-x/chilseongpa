@@ -26,3 +26,7 @@ variable "db_password" {
   type        = string
   sensitive   = true # 비밀번호가 로그나 화면에 노출되는 것을 방지
 }
+variable "ssh_public_key" {
+  description = "Ansible 접속을 허용할 SSH 공개키(자물쇠)"
+  type        = string
+}
