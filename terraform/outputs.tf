@@ -3,7 +3,7 @@
 # ==============================================================================
 
 output "k3s_static_ip" {
-  description = "K3s 서버의 고정 IP (성호님이 Ansible inventory.ini에 넣을 값)"
+  description = "K3s 서버의 고정 IP"
   value       = google_compute_address.k3s_static_ip.address
 }
 
@@ -13,8 +13,4 @@ output "db_proxy_sa_key" {
   sensitive   = true # 터미널에 평문 노출 방지 (볼 때는 terraform output -raw db_proxy_sa_key 명령어 사용)
 }
 
-output "monitoring_sa_key" {
-  description = "희정님(AWS 모니터링)에게 전달할 GCP Monitoring API 수집용 JSON 키"
-  value       = base64decode(google_service_account_key.monitoring_sa_key.private_key)
-  sensitive   = true
-}
+# 🗑️ monitoring_sa_key 부분은 Cloudflare Tunnel 도입으로 인해 완전히 삭제!
