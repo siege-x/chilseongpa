@@ -77,7 +77,7 @@ resource "time_sleep" "wait_30_seconds_monitoring" {
   create_duration = "30s"
 }
 
-# 3. 서비스 계정에 서버 목록 열람 권한(Compute Viewer) 부여
+# 3. 서비스 계정에 서버 목록 열람 권한(monitoring Viewer) 부여
 resource "google_project_iam_member" "monitoring_sa_role" {
   depends_on = [time_sleep.wait_30_seconds_monitoring]
   project    = var.project_id
