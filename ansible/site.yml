@@ -4,5 +4,4 @@
   become: yes # 관리자(root) 권한으로 실행
   roles:
     - k3s_primary
-    # 👇 팀장님 1안 결과나 토큰이 나올 때까지, 이 줄만 주석(#) 처리합니다!
-    # - cloudflare
+    - cloudflare
