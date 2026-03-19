@@ -1,0 +1,25 @@
+---
+- name: Docker 설치 여부 확인
+  command: which docker
+  register: docker_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Docker 설치 (터널 데몬 구동용)
+  shell: |
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+  when: docker_installed.rc != 0
+
+- name: Docker 서비스 활성화 및 시작
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Cloudflare Zero Trust 터널 컨테이너 실행 (승민님 토큰 주입)
+  docker_container:
+    name: cloudflare-tunnel
+    image: cloudflare/cloudflared:latest
+    command: "tunnel --no-autoupdate run --token {{ cloudflare_token }}"
+    restart_policy: always # 💡 핵심: 서버가 껐다 켜져도 터널은 무조건 다시 뚫림
