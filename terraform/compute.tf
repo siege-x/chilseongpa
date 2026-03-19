@@ -29,4 +29,8 @@ resource "google_compute_instance" "k3s_primary_node" {
 
   # 이 서버의 꼬리표. network.tf의 방화벽이 이 꼬리표를 보고 길을 열어줍니다.
   tags = ["k3s-node"] 
+  # 우분투(ubuntu)라는 이름표를 단 로봇만 이 자물쇠를 열 수 있다고 설정하는 겁니다.
+  metadata = {
+    ssh-keys = "ubuntu:${var.ssh_public_key}"
+  }
 }
