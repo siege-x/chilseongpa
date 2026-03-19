@@ -76,7 +76,9 @@ resource "google_service_account_key" "monitoring_sa_key" {
 resource "google_secret_manager_secret" "monitoring_key_secret" {
   depends_on = [google_project_service.secretmanager_api]
   secret_id  = "gcp-monitoring-key-json"
-  replication { auto {} }
+  replication {
+    auto {}
+  }
 }
 
 resource "google_secret_manager_secret_version" "monitoring_key_version" {
