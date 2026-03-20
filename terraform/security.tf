@@ -39,7 +39,7 @@ resource "google_secret_manager_secret_version" "db_proxy_key_version" {
 # Prometheus 모니터링 서버의 접근을 허용하는 방화벽 규칙
 resource "google_compute_firewall" "allow_node_exporter" {
   name    = "allow-node-exporter"
-  network = google_compute_network.vpc_network.name # 성호 님 VPC 이름으로 확인하세요!
+  network = "default"
 
   allow {
     protocol = "tcp"
