@@ -24,3 +24,7 @@ Terraform 배포가 완료된 후, Tunnel Token을 주입하여 실행합니다.
 cd ansible
 # inventory.ini에 GCP VM IP가 등록된 상태에서 실행
 ansible-playbook -i inventory.ini site.yml -e "cloudflare_token=<CF_TUNNEL_TOKEN>"
+```
+
+GCP는 k3s_primary role 내에 node-exporter 설치가 포함되어 있습니다
+
