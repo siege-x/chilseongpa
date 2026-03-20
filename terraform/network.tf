@@ -3,7 +3,11 @@
 # ==============================================================================
 resource "google_compute_address" "k3s_static_ip" {
   name   = "k3s-primary-static-ip"
-  region = var.region
+  region = "asia-northeast3"
+
+  lifecycle {
+    prevent_destroy = true # 테라폼이 이 리소스를 절대 삭제하지 못하게 잠금!
+  }
 }
 
 # -------------------------------------------------------------------------
