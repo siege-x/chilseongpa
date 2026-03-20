@@ -1,14 +1,3 @@
-# ==============================================================================
-# [security.tf] Secret Manager 공통 API 및 서비스 계정/키 관리
-# ==============================================================================
-
-# 0. Secret Manager API 활성화 (단일 선언)
-resource "google_project_service" "secretmanager_api" {
-  project            = var.project_id
-  service            = "secretmanager.googleapis.com"
-  disable_on_destroy = false
-}
-
 # ------------------------------------------------------------------------------
 # 1. Cloud SQL Auth Proxy용 계정 및 키 관리
 # ------------------------------------------------------------------------------
