@@ -24,7 +24,6 @@ resource "google_service_account_key" "db_proxy_sa_key" {
 }
 
 resource "google_secret_manager_secret" "db_proxy_key_secret" {
-  depends_on = [google_project_service.secretmanager_api]
   secret_id  = "gcp-db-proxy-key-json"
   replication {
     auto {}
