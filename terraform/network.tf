@@ -1,15 +1,3 @@
-# ==============================================================================
-# [network.tf] GCP 네트워크 및 기본 방화벽 설정
-# ==============================================================================
-resource "google_compute_address" "k3s_static_ip" {
-  name   = "k3s-primary-static-ip"
-  region = "asia-northeast3"
-
-  lifecycle {
-    prevent_destroy = true # 테라폼이 이 리소스를 절대 삭제하지 못하게 잠금!
-  }
-}
-
 # -------------------------------------------------------------------------
 # 🛡️ 방화벽: 관리자(Ansible) 초기 프로비저닝용 SSH 포트만 개방
 # (향후 완벽한 터널링 구성 시 이 포트마저 닫고 IAP를 통해 접근 가능)
@@ -20,7 +8,7 @@ resource "google_compute_firewall" "allow_admin_access" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "9100"] # SSH 및 Node Exporter 포트 통합 관리
   }
 
   target_tags   = ["k3s-node"]
