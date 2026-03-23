@@ -23,7 +23,6 @@ resource "google_compute_instance" "k3s_primary_node" {
   network_interface {
     network = "default"
     access_config {
-      nat_ip = google_compute_address.k3s_static_ip.address
     }
   }
 
