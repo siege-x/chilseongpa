@@ -13,7 +13,7 @@ resource "time_sleep" "wait_30_seconds_db" {
 
 resource "google_project_iam_member" "db_proxy_sa_role" {
   depends_on = [time_sleep.wait_30_seconds_db]
-  project    = var.project_id
+  project    = var.gcp_project_id
   role       = "roles/cloudsql.client"
   member     = "serviceAccount:${google_service_account.db_proxy_sa.email}"
 }
