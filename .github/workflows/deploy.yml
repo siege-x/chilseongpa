@@ -1,1 +1,81 @@
+name: 'Zero Trust K3s Infrastructure Pipeline'
 
+# 코드가 main 브랜치에 푸시되거나, 수동으로 버튼을 누를 때 실행됩니다.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: 
+
+# 💡 [수정 포인트 1] 팀 컨벤션에 맞춰 우리가 바꿨던 gcp_ 변수명으로 매핑!
+env:
+  TF_VAR_gcp_project_id: ${{ secrets.TF_VAR_PROJECT_ID }}
+  TF_VAR_gcp_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+  TF_VAR_gcp_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+
+jobs:
+  deploy:
+    name: 'Terraform & Ansible Auto Deploy'
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 깃허브에서 성호 님의 최신 코드 가져오기
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. 구글 클라우드(GCP) 관리자 권한으로 안전하게 로그인
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCPKEY_JSON }}
+          project_id: ${{ secrets.TF_VAR_PROJECT_ID }} 
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      # 3. 🛡️ 현재 깃허브 서버의 실시간 IP를 뽑아서 테라폼에 넘길 준비 (Zero Trust)
+      - name: Get GitHub Runner IP
+        id: ip
+        run: |
+          RUNNER_IP=$(curl -s ifconfig.me)
+          echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
+
+      # 4. 테라폼 세팅
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # 5. 🚀 테라폼 실행: 서버 만들고 방화벽에 방금 뽑은 깃허브 IP만 딱 열어줌
+      - name: Terraform Init & Apply
+        working-directory: ./terraform
+        env:
+          TF_VAR_runner_ip: "${{ env.RUNNER_IP }}"
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      # 6. 🔑 앤서블이 서버에 들어갈 수 있게 SSH 개인키(Private Key) 세팅
+      - name: Setup SSH Key for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      # 7. 🎯 동적 인벤토리 생성: 테라폼이 뱉어낸 서버 IP를 앤서블에 꽂아 넣음
+      - name: Generate Dynamic Inventory
+        working-directory: ./terraform
+        run: |
+          # 💡 [수정 포인트 2] 옛날 static_ip를 버리고, 우리가 방금 만든 ephemeral_ip 로 변경!
+          SERVER_IP=$(terraform output -raw gcp_k3s_ephemeral_ip)
+          mkdir -p ../ansible
+          echo "[k3s_nodes]" > ../ansible/inventory.ini
+          echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ../ansible/inventory.ini
+
+      # 8. 🚀 대망의 앤서블 실행: K3s 설치하고 Cloudflare 터널 개통!
+      - name: Run Ansible Playbook
+        working-directory: ./ansible
+        run: |
+          export ANSIBLE_HOST_KEY_CHECKING=False
+          # 승민 님이 주신 토큰을 깃허브 금고에서 꺼내서 앤서블로 다이렉트 주입!
+          ansible-playbook -i inventory.ini site.yml --extra-vars "cloudflare_token=${{ secrets.CLOUDFLARE_TOKEN }}"
