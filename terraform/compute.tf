@@ -19,7 +19,7 @@ resource "google_compute_instance" "k3s_primary_node" {
     }
   }
 
-  # 네트워크 설정 (network.tf에서 만든 고정 IP를 여기에 꽂아줍니다)
+  # 네트워크 설정 
   network_interface {
     network = "default"
     access_config {
