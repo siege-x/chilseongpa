@@ -2,9 +2,9 @@
 # [outputs.tf] 인프라 배포 후 아키텍트가 팀원들에게 불출할 결과물 목록
 # ==============================================================================
 
-output "k3s_static_ip" {
-  description = "K3s 서버의 고정 IP"
-  value       = google_compute_address.k3s_static_ip.address
+output "k3s_ephemeral_ip" {
+  description = "K3s 서버의 자동 할당된 공인 IP (Cloudflare 터널 연결 전 임시 확인용)"
+  value       = google_compute_instance.k3s_primary_node.network_interface.0.access_config.0.nat_ip
 }
 
 output "db_proxy_sa_key" {
