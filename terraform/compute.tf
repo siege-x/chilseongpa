@@ -8,7 +8,7 @@ resource "google_compute_instance" "k3s_primary_node" {
   # 아키텍트의 결단: 부하 테스트(JMeter)와 K3s 안정성을 위해 e2-standard-2(RAM 8GB) 선택
   # (Swap 메모리 같은 땜질식 처방 방지)
   machine_type = "e2-standard-2" 
-  zone         = var.zone
+  zone         = var.gcp_zone
 
   # OS 및 디스크 설정
   boot_disk {
