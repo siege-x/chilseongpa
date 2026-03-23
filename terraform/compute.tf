@@ -30,6 +30,6 @@ resource "google_compute_instance" "k3s_primary_node" {
   tags = ["k3s-node"] 
   # 우분투(ubuntu)라는 이름표를 단 로봇만 이 자물쇠를 열 수 있다고 설정하는 겁니다.
   metadata = {
-    ssh-keys = "ubuntu:${var.ssh_public_key}"
+    ssh-keys = "ubuntu:${var.gcp_ssh_public_key}"
   }
 }
