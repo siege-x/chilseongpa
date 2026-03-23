@@ -49,8 +49,6 @@ jobs:
       # 5. 🚀 테라폼 실행: 서버 만들고 방화벽에 방금 뽑은 깃허브 IP만 딱 열어줌
       - name: Terraform Init & Apply
         working-directory: ./terraform
-        env:
-          TF_VAR_runner_ip: "${{ env.RUNNER_IP }}"
         run: |
           terraform init
           terraform apply -auto-approve
@@ -67,7 +65,7 @@ jobs:
         working-directory: ./terraform
         run: |
           # 💡 [수정 포인트 2] 옛날 static_ip를 버리고, 우리가 방금 만든 ephemeral_ip 로 변경!
-          SERVER_IP=$(terraform output -raw gcp_k3s_ephemeral_ip)
+          SERVER_IP=$(terraform output -raw k3s_ephemeral_ip)
           mkdir -p ../ansible
           echo "[k3s_nodes]" > ../ansible/inventory.ini
           echo "$SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ../ansible/inventory.ini
