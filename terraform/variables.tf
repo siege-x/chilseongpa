@@ -1,46 +1,48 @@
 # ==============================================================================
-# [variables.tf] 하드코딩을 방지하고, 환경(Dev/Prod)이 바뀔 때 유연하게 
-# 대처하기 위해 사용하는 변수 저장소입니다.
+# [variables.tf] 
+# 팀 공통 코드에서 사용하는 모든 변수를 여기서 선언해야 에러가 나지 않습니다.
 # ==============================================================================
 
+# 1. 네이밍 관련 (image_95ed7a.png 에러 해결용)
+variable "project_name" {
+  description = "프로젝트 이름"
+  type        = string
+  default     = "chiltong" # 성호님 프로젝트에 맞는 이름
+}
+
+variable "environment" {
+  description = "배포 환경"
+  type        = string
+  default     = "dev"
+}
+
+# 2. 클라우드플레어 관련 (image_95f4c2.png 에러 해결용)
+variable "tunnel_token" {
+  description = "Cloudflare Tunnel Token"
+  type        = string
+  sensitive   = true # 보안을 위해 터미널 출력 방지
+}
+
+# 3. 기존 GCP 설정 변수들 (누락되지 않게 확인)
 variable "gcp_project_id" {
-  description = "GCP 프로젝트 ID (GitHub Secrets: TF_VAR_project_id에서 보안 주입)"
   type        = string
 }
 
 variable "gcp_region" {
-  description = "인프라가 배포될 리전 (AWS와 통신 지연을 막기 위해 서울로 고정)"
   type        = string
-  default     = "asia-northeast3" # 아키텍트의 결정: 서울 리전
+  default     = "asia-northeast3"
 }
 
 variable "gcp_zone" {
-  description = "인프라가 배포될 가용 영역"
   type        = string
   default     = "asia-northeast3-a"
 }
 
 variable "gcp_db_password" {
-  # 💡 수정된 설명: 파일이 아닌 GitHub Secrets를 통한 보안 주입임을 명시
-  description = "Cloud SQL Root 비밀번호 (GitHub Secrets: TF_VAR_db_password를 통해 주입)"
   type        = string
-  sensitive   = true # 비밀번호가 로그나 화면에 노출되는 것을 방지
-}
-variable "gcp_ssh_public_key" {
-  description = "Ansible 접속을 허용할 SSH 공개키(자물쇠)"
-  type        = string
-}
-# --- 네이밍 규칙을 위한 공통 변수 ---
-variable "project_name" {
-  description = "프로젝트 이름 (리소스 네이밍 접두어)"
-  type        = string
-  # 💡 깃허브 액션이 멈추지 않도록 기본값을 반드시 지정합니다.
-  default     = "hybrid" 
+  sensitive   = true
 }
 
-variable "environment" {
-  description = "배포 환경 (예: dev, prod, standby)"
+variable "gcp_ssh_public_key" {
   type        = string
-  # 💡 마스터 브랜치 기준의 기본 환경을 지정합니다.
-  default     = "dev" 
 }
