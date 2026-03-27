@@ -30,3 +30,17 @@ variable "gcp_ssh_public_key" {
   description = "Ansible 접속을 허용할 SSH 공개키(자물쇠)"
   type        = string
 }
+# --- 네이밍 규칙을 위한 공통 변수 ---
+variable "project_name" {
+  description = "프로젝트 이름 (리소스 네이밍 접두어)"
+  type        = string
+  # 💡 깃허브 액션이 멈추지 않도록 기본값을 반드시 지정합니다.
+  default     = "hybrid" 
+}
+
+variable "environment" {
+  description = "배포 환경 (예: dev, prod, standby)"
+  type        = string
+  # 💡 마스터 브랜치 기준의 기본 환경을 지정합니다.
+  default     = "dev" 
+}
